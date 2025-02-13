@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #FFC0CB;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        canvas {
+            border: 3px solid white;
+            background-color: #FF69B4;
+            display: none;
+            width: 90vw;
+            height: 90vw;
+            max-width: 400px;
+            max-height: 400px;
+        }
+        .controls, #retryButton {
+            display: none;
+        }
+        button {
+            background-color: white;
+            border: none;
+            padding: 10px;
+            margin: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: lightgray;
+        }
+    </style>
+</head>
+<body>
+    <audio id="bgMusic" autoplay loop>
+        <source src="Y2meta - 747ce91d98bc34c.mp4" type="audio/mpeg">
+    </audio>
+
+    <div id="startScreen">
+        <h2>GAME BUAT KAMUU YA SAYAANG BIAR KAMU HAPPY</h2>
+        <p>INI PERINTAH DARI AKU, AKU KASIH TANTANGAN BUAT KAMU COBA KAMU MAKAN SAMPAI 10 MAKANANNYA. BISAAA TIDAA???</p>
+        <button onclick="startGame()">Mulai</button>
+    </div>
+    
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <div class="controls">
+        <button onclick="changeDirection('UP')">⬆️</button><br>
+        <button onclick="changeDirection('LEFT')">⬅️</button>
+        <button onclick="changeDirection('RIGHT')">➡️</button><br>
+        <button onclick="changeDirection('DOWN')">⬇️</button>
+    </div>
+    <button id="retryButton" onclick="restartGame()">Retry</button>
+    
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const retryButton = document.getElementById("retryButton");
+        const startScreen = document.getElementById("startScreen");
+        const controls = document.querySelector(".controls");
+        const bgMusic = document.getElementById("bgMusic");
+
+        let snake, direction, food, score, gameRunning;
+
+        function startGame() {
+            startScreen.style.display = "none";
+            canvas.style.display = "block";
+            controls.style.display = "block";
+            retryButton.style.display = "none";
+            bgMusic.play();
+            initGame();
+        }
+
+        function initGame() {
+            snake = [{ x: 200, y: 200 }];
+            direction = "RIGHT";
+            food = { x: 100, y: 100 };
+            score = 0;
+            gameRunning = true;
+            gameLoop();
+        }
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
+            if (event.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
+            if (event.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
+            if (event.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
+        });
+
+        function changeDirection(newDirection) {
+            if (newDirection === "UP" && direction !== "DOWN") direction = "UP";
+            if (newDirection === "DOWN" && direction !== "UP") direction = "DOWN";
+            if (newDirection === "LEFT" && direction !== "RIGHT") direction = "LEFT";
+            if (newDirection === "RIGHT" && direction !== "LEFT") direction = "RIGHT";
+        }
+
+        function draw() {
+            ctx.fillStyle = "#FF69B4";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "red";
+            ctx.fillRect(food.x, food.y, 10, 10);
+            ctx.fillStyle = "white";
+            snake.forEach(segment => ctx.fillRect(segment.x, segment.y, 10, 10));
+        }
+
+        function update() {
+            if (!gameRunning) return;
+
+            let head = { ...snake[0] };
+            if (direction === "UP") head.y -= 10;
+            if (direction === "DOWN") head.y += 10;
+            if (direction === "LEFT") head.x -= 10;
+            if (direction === "RIGHT") head.x += 10;
+
+            if (head.x === food.x && head.y === food.y) {
+                score++;
+                food = { x: Math.floor(Math.random() * 40) * 10, y: Math.floor(Math.random() * 40) * 10 };
+            } else {
+                snake.pop();
+            }
+
+            if (score === 10) {
+                alert("YEAAYYY KAMUU BISAA MAKAN SAMPAI 10, HEBATT YAA SAYANGNYAA AKUUU");
+                restartGame();
+            }
+
+            if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
+                gameRunning = false;
+                alert("YAHHH MASA NABRAK SI SAYAANGG");
+                retryButton.style.display = "block";
+                return;
+            }
+
+            snake.unshift(head);
+        }
+
+        function gameLoop() {
+            if (gameRunning) {
+                update();
+                draw();
+                setTimeout(gameLoop, 100);
+            }
+        }
+
+        function restartGame() {
+            initGame();
+            retryButton.style.display = "none";
+        }
+    </script>
+</body>
+</html>
